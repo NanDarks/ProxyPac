@@ -1,7 +1,7 @@
 name: Proxy Checker
 on:
   schedule:
-    - cron: '0 0 * * *'  # This runs the job once a day at midnight
+    - cron: '0 * * * *'  # This runs the job once an hour
   workflow_dispatch:
 
 jobs:
