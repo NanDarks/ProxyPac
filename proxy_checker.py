@@ -1,54 +1,64 @@
 import requests
-from concurrent.futures import ThreadPoolExecutor
+import re
 
-# Define proxy sources
-proxy_sources = [
-    "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt",
-    "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=all",
-    "https://www.sslproxies.org/"
+# List of proxy sources in RAW format
+# You can add or remove links from this list
+PROXY_SOURCES = [
+    'https://raw.githubusercontent.com/themiralay/Proxy-List-World/main/list.txt',
+    'https://raw.githubusercontent.com/MrMarble/proxy-list/main/country/us.txt',
+    'https://raw.githubusercontent.com/MrMarble/proxy-list/main/country/de.txt',
+    'https://raw.githubusercontent.com/MrMarble/proxy-list/main/country/ca.txt',
+    'https://raw.githubusercontent.com/mmpx12/proxy-list/main/socks5/http.txt',
+    'https://raw.githubusercontent.com/noctiro/getproxy/master/file/socks5.txt',
+    'https://raw.githubusercontent.com/BreakingTechFr/Proxy_Free/main/proxies/germany.txt',
+    'https://raw.githubusercontent.com/BreakingTechFr/Proxy_Free/main/proxies/us.txt',
+    'https://raw.githubusercontent.com/BreakingTechFr/Proxy_Free/main/proxies/canada.txt',
+    'https://raw.githubusercontent.com/gitrecon1455/fresh-proxy-list/main/proxylist.txt',
 ]
 
-# Function to check if a proxy is working
-def check_proxy(proxy):
-    try:
-        proxies = {
-            'http': f'http://{proxy}',
-            'https': f'https://{proxy}'
-        }
-        test_url = "https://www.google.com"
-        requests.get(test_url, proxies=proxies, timeout=10)
-        print(f"✅ {proxy} is working!")
-        return proxy
-    except Exception as e:
-        return None
-
-# Main function to get and check proxies
-def get_working_proxies():
+def get_proxies_from_sources(sources):
+    """Fetches and combines proxies from a list of URLs."""
     all_proxies = set()
-    for url in proxy_sources:
+    for url in sources:
         try:
             response = requests.get(url, timeout=10)
-            proxies = response.text.splitlines()
-            all_proxies.update(proxies)
-            print(f"Found {len(proxies)} proxies from {url}")
-        except:
-            print(f"Could not fetch from {url}")
+            if response.status_code == 200:
+                proxies = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+', response.text)
+                for proxy in proxies:
+                    all_proxies.add(proxy)
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching proxies from {url}: {e}")
+    return all_proxies
 
+def check_proxy(proxy):
+    """Checks if a proxy is working by connecting to a test URL."""
+    proxies = {'http': f'http://{proxy}', 'https': f'https://{proxy}'}
+    try:
+        requests.get('https://www.google.com', proxies=proxies, timeout=10)
+        return True
+    except requests.exceptions.RequestException:
+        return False
+
+def main():
+    print("Fetching proxy lists...")
+    all_proxies = get_proxies_from_sources(PROXY_SOURCES)
+    print(f"Found {len(all_proxies)} proxies to check.")
+    
     working_proxies = []
-    with ThreadPoolExecutor(max_workers=50) as executor:
-        results = executor.map(check_proxy, all_proxies)
-        for result in results:
-            if result:
-                working_proxies.append(result)
+    for i, proxy in enumerate(all_proxies):
+        print(f"Checking proxy {i+1}/{len(all_proxies)}: {proxy}")
+        if check_proxy(proxy):
+            working_proxies.append(proxy)
+            print("  --> Working!")
+        else:
+            print("  --> Not working.")
+            
+    with open('working_proxies.txt', 'w') as f:
+        for proxy in working_proxies:
+            f.write(proxy + '\n')
+            
+    print(f"\nFinished checking. Found {len(working_proxies)} working proxies.")
+    print("List saved to working_proxies.txt")
 
-    return working_proxies
-
-# Run the program and save output to file
 if __name__ == "__main__":
-    healthy_proxies = get_working_proxies()
-    with open("working_proxies.txt", "w") as f:
-        for p in healthy_proxies:
-            f.write(p + "\n")
-    print("\n--- Summary ---")
-    print(f"Total working proxies found: {len(healthy_proxies)}")
-    print("List of working proxies saved to working_proxies.txt")
+    main()
