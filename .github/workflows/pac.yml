@@ -1,4 +1,4 @@
-name: Generate PAC File
+name: Generate PAC Files
 
 on:
   push:
@@ -20,13 +20,26 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Run PAC generator script
-      run: python pac_generator.py
+    - name: Install dependencies
+      run: pip install requests
+
+    - name: Run PAC generator for US
+      run: python pac_generator.py us
+
+    - name: Run PAC generator for Germany
+      run: python pac_generator.py de
+
+    - name: Run PAC generator for France
+      run: python pac_generator.py fr
+
+    - name: Run PAC generator for Netherlands
+      run: python pac_generator.py nl
 
     - name: Commit and push changes
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add proxy.pac
-        git commit -m "Update proxy.pac"
+        git add pac_files
+        git commit -m "Update PAC files" || echo "No changes to commit"
+        git pull --rebase
         git push
