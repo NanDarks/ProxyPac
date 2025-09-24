@@ -1,0 +1,33 @@
+name: Fast Proxy Checker
+
+on:
+  schedule:
+    - cron: '45 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install requests
+
+    - name: Run fast proxy checker script
+      run: python proxy_checker_fast.py
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add working_proxies_fast.txt
+        git commit -m "Update fast working proxies" || echo "No changes to commit"
+        git pull --rebase
+        git push
