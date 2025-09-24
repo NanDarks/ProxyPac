@@ -1,0 +1,32 @@
+name: Generate PAC File
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'working_proxies.txt'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Run PAC generator script
+      run: python pac_generator.py
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add proxy.pac
+        git commit -m "Update proxy.pac"
+        git push
