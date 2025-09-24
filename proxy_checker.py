@@ -2,18 +2,10 @@ import requests
 import re
 
 # List of proxy sources in RAW format
-# You can add or remove links from this list
+# This list now focuses ONLY on HTTPS and SOCKS5 proxies.
 PROXY_SOURCES = [
-    'https://raw.githubusercontent.com/themiralay/Proxy-List-World/main/list.txt',
-    'https://raw.githubusercontent.com/MrMarble/proxy-list/main/country/us.txt',
-    'https://raw.githubusercontent.com/MrMarble/proxy-list/main/country/de.txt',
-    'https://raw.githubusercontent.com/MrMarble/proxy-list/main/country/ca.txt',
     'https://raw.githubusercontent.com/mmpx12/proxy-list/main/socks5/http.txt',
     'https://raw.githubusercontent.com/noctiro/getproxy/master/file/socks5.txt',
-    'https://raw.githubusercontent.com/BreakingTechFr/Proxy_Free/main/proxies/germany.txt',
-    'https://raw.githubusercontent.com/BreakingTechFr/Proxy_Free/main/proxies/us.txt',
-    'https://raw.githubusercontent.com/BreakingTechFr/Proxy_Free/main/proxies/canada.txt',
-    'https://raw.githubusercontent.com/gitrecon1455/fresh-proxy-list/main/proxylist.txt',
 ]
 
 def get_proxies_from_sources(sources):
