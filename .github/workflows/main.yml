@@ -1,0 +1,31 @@
+name: Proxy Checker
+on:
+  schedule:
+    - cron: '0 0 * * *'  # This runs the job once a day at midnight
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install requests
+
+    - name: Run proxy checker script
+      run: python proxy_checker.py
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add working_proxies.txt
+        git commit -m "Update working proxies"
+        git push
